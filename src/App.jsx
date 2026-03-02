@@ -4,6 +4,9 @@ import { useState, useEffect } from "react";
 import Search from "./components/Search.jsx";
 import Spinner from "./components/Spinner.jsx";
 import MovieCard from "./components/MovieCard.jsx";
+import { updateSearchMetrics } from "./appwrite.js";
+import Toast from "./components/Toast.jsx";
+
 
 const API_BASE_URL = "https://api.themoviedb.org/3";
 
@@ -23,6 +26,7 @@ const App = () => {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(false);
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+  const [saveStatus, setSaveStatus] = useState(null); // { message, type }
 
   //Debounce the search term to prevent making too many API requests
   //by waiting for a specified delay (500ms in this case) after the user stops typing before updating the debounced search term. This helps to reduce the number of API calls and improve performance, especially when the user is typing quickly.
@@ -56,6 +60,13 @@ const App = () => {
       }
 
       console.log(data);
+      if (query && data.results.length > 0) {
+        console.log("About to call updateSearchMetrics", { query, firstResult: data.results[0] });
+        const ok = await updateSearchMetrics(query, data.results[0]);
+        console.log("updateSearchMetrics returned", ok);
+        if (ok) setSaveStatus({ message: `Saved search: "${query}"`, type: 'success' });
+        else setSaveStatus({ message: 'Failed to save search metrics', type: 'error' });
+      }
     } catch (error) {
       console.error("Error fetching movies:", error);
       setErrorMessage("Failed to fetch movies. Please try again later.");
@@ -81,6 +92,7 @@ const App = () => {
           </h1>
           <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
         </header>
+        <Toast message={saveStatus?.message} type={saveStatus?.type} onClose={() => setSaveStatus(null)} />
         <section className="all-movies">
           <h2 className="text-white mt-[40px]">All Movies</h2>
           {loading ? (
