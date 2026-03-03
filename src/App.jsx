@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Search from "./components/Search.jsx";
 import Spinner from "./components/Spinner.jsx";
 import MovieCard from "./components/MovieCard.jsx";
-import { updateSearchMetrics } from "./appwrite.js";
+import { updateSearchMetrics , getTrendingMovies } from "./appwrite.js";
 import Toast from "./components/Toast.jsx";
 
 
@@ -27,6 +27,7 @@ const App = () => {
   const [loading, setLoading] = useState(false);
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [saveStatus, setSaveStatus] = useState(null); // { message, type }
+  const [trendingMovies, setTrendingMovies] = useState([]);
 
   //Debounce the search term to prevent making too many API requests
   //by waiting for a specified delay (500ms in this case) after the user stops typing before updating the debounced search term. This helps to reduce the number of API calls and improve performance, especially when the user is typing quickly.
@@ -75,9 +76,22 @@ const App = () => {
     }
   }
 
+  const loadTrendingMovies = async () => {
+    try {
+      const movies = await getTrendingMovies();
+      setTrendingMovies(movies);
+    } catch (error) {
+      console.error("Error loading trending movies:", error);
+    }
+  };
+
   useEffect(() => {
     fetchMovies(debouncedSearchTerm);//when the component mounts, it will fetch movies based on the debounced search term. If the debounced search term is empty, it will fetch popular movies.
   }, [debouncedSearchTerm]);//this effect runs whenever the debouncedSearchTerm changes, allowing the app to fetch new movies based on the user's input.
+
+  useEffect(() => {
+    loadTrendingMovies();
+  }, []);
 
   return (
     <main>
@@ -92,9 +106,24 @@ const App = () => {
           </h1>
           <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
         </header>
+        
+        {trendingMovies.length > 0 && (
+          <section className="trending">
+            <h2>Trending Movies</h2>
+            <ul className="trending-list">
+              {trendingMovies.map((movie, index) => (
+                <li key={movie.$id} className="trending-item">
+                  <div className="trending-rank">{index + 1}</div>
+                  <img className="trending-poster" src={movie.poster_url || '/no-movie.png'} alt={movie.title} />
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
         <Toast message={saveStatus?.message} type={saveStatus?.type} onClose={() => setSaveStatus(null)} />
         <section className="all-movies">
-          <h2 className="text-white mt-[40px]">All Movies</h2>
+          <h2 className= "mt-8">All Movies</h2>
           {loading ? (
             <Spinner />
           ) : errorMessage ? (

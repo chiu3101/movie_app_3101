@@ -60,20 +60,20 @@
   .trending {
     @apply mt-20;
 
-    & ul {
-      @apply flex flex-row overflow-y-auto gap-5 -mt-10 w-full hide-scrollbar;
+    & .trending-list {
+      @apply flex flex-row overflow-x-auto gap-6 w-full hide-scrollbar;
     }
 
-    & ul li {
-      @apply min-w-[230px] flex flex-row items-center;
+    & .trending-item {
+      @apply flex flex-row items-center gap-4 min-w-max;
     }
 
-    & ul li p {
-      @apply fancy-text mt-[22px] text-nowrap;
+    & .trending-rank {
+      @apply text-6xl font-black text-white min-w-max;
     }
 
-    & ul li img {
-      @apply w-[127px] h-[163px] rounded-lg object-cover -ml-3.5;
+    & .trending-poster {
+      @apply w-40 h-56 rounded-lg object-cover shadow-lg;
     }
   }
 

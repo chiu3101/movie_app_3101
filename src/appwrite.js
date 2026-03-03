@@ -81,3 +81,18 @@ export const updateSearchMetrics = async (searchTerm , movie) => {
     }
     return true;
 }
+
+export const getTrendingMovies = async () => {
+    try {
+        // fetch the top 5 search terms ordered by count descending
+        const results = await database.listDocuments(DATABASE_ID, COLLECTION_ID, [
+            Query.orderDesc('count'),
+            Query.limit(5),
+        ]);
+        // make sure we always return an array even if no documents
+        return results.documents || [];
+    } catch (error) {
+        console.error("Error fetching trending movies:", error);
+        return [];
+    }
+}
