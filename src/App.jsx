@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Search from "./components/Search.jsx";
 import Spinner from "./components/Spinner.jsx";
 import MovieCard from "./components/MovieCard.jsx";
+import MovieModal from "./components/MovieModal.jsx";
 import { updateSearchMetrics , getTrendingMovies } from "./appwrite.js";
 import Toast from "./components/Toast.jsx";
 
@@ -28,6 +29,7 @@ const App = () => {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [saveStatus, setSaveStatus] = useState(null); // { message, type }
   const [trendingMovies, setTrendingMovies] = useState([]);
+  const [selectedMovieId, setSelectedMovieId] = useState(null);
 
   //Debounce the search term to prevent making too many API requests
   //by waiting for a specified delay (500ms in this case) after the user stops typing before updating the debounced search term. This helps to reduce the number of API calls and improve performance, especially when the user is typing quickly.
@@ -131,12 +133,19 @@ const App = () => {
           ) : (
             <ul>
               {movies.map((movie) => (
-                <MovieCard key={movie.id} movie={movie} />
+                <MovieCard key={movie.id} movie={movie} onClick={(m) => setSelectedMovieId(m.id)} />
               ))}
             </ul>
           )}
         </section>
       </div>
+
+      {selectedMovieId && (
+        <MovieModal
+          movieId={selectedMovieId}
+          onClose={() => setSelectedMovieId(null)}
+        />
+      )}
     </main>
   );
 };
